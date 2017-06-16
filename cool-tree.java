@@ -6,8 +6,8 @@
 //
 //////////////////////////////////////////////////////////
 
-import java.io.PrintStream;
 import java.util.*;
+import java.io.PrintStream;
 
 //Prueba de que si esta haciendo algo
 
@@ -220,18 +220,18 @@ class Cases extends ListNode {
     <p>
     See <a href="TreeNode.html">TreeNode</a> for full documentation. */
 class programc extends Program {
-    private Set<String> classSet;
+    private Map< String,class_c > classMap;
     private ClassTable classTable;
 
     protected Classes classes;
     /** Creates "programc" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for classes
+      * @param a1 initial value for classes
       */
     public programc(int lineNumber, Classes a1) {
         super(lineNumber);
-        classSet = new HashSet<String>();
+        classMap = new HashMap<String,class_c>();
         classes = a1;
         classTable = new ClassTable(classes);
     }
@@ -242,7 +242,6 @@ class programc extends Program {
         out.print(Utilities.pad(n) + "programc\n");
         classes.dump(out, n+2);
     }
-
     
     public void dump_with_types(PrintStream out, int n) {
         dump_line(out, n);
@@ -251,18 +250,45 @@ class programc extends Program {
             // sm: changed 'n + 1' to 'n + 2' to match changes elsewhere
 	       class_c class_ = (class_c) e.nextElement();
            class_.dump_with_types(out, n + 2);
-           if(!this.classSet.add(String.valueOf(class_.getName()))){
+           if(this.classMap.containsKey(String.valueOf(class_.getName()))){
                 out.print("No compila para clase repetida\n");
                 classTable.semantError();
-                break;
+                System.exit(1);
            }
-           //((Class_)e.nextElement()).dump_with_types(out, n + 2);
+           else{
+               classMap.put(String.valueOf(class_.getName()),class_);
+           }
         }
-        if (classTable.errors()) {
-            System.err.println("Compilation halted due to static semantic errors.");
-            System.exit(1);
+        checkClassParentExists(out,n);
+
+        for (Map.Entry<String,class_c> entry : classMap.entrySet()){
+            class_c class_ = entry.getValue();
+            if(!String.valueOf(class_.getParent()).contentEquals("Object")){
+                class_c parent = classMap.get(String.valueOf(class_.getParent()));
+                System.out.println("Imprime el padre: "+String.valueOf(parent.getName()));
+                while(!String.valueOf(parent.getName()).contentEquals("Object") && !String.valueOf(parent.getName()).contentEquals(String.valueOf(class_.getName()))) {
+                    parent = classMap.get(String.valueOf(parent.getParent()));
+                }
+                if(String.valueOf(parent.getName()).contentEquals(String.valueOf(class_.getName()))){
+                    out.print("No compila para ciclos de herencias\n");
+                    classTable.semantError();
+                    System.exit(1);
+                }
+            }
         }
     }
+
+    public void checkClassParentExists(PrintStream out, int n){
+        for (Map.Entry<String,class_c> entry : classMap.entrySet()) {
+            class_c class_ = entry.getValue();
+            if(!(this.classMap.containsKey(String.valueOf(class_.getParent())) || String.valueOf(class_.getParent()).contentEquals("Object"))){
+                out.print("No existe clase herencia\n");
+                classTable.semantError();
+                System.exit(1);
+            }
+        }
+    }
+
     /** This method is the entry point to the semantic checker.  You will
         need to complete it in programming assignment 4.
 	<p>
@@ -305,10 +331,10 @@ class class_c extends Class_ {
     /** Creates "class_c" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for parent
-      * @param a2 initial value for features
-      * @param a3 initial value for filename
+      * @param a1 initial value for name
+      * @param a2 initial value for parent
+      * @param a3 initial value for features
+      * @param a4 initial value for filename
       */
     public class_c(int lineNumber, AbstractSymbol a1, AbstractSymbol a2, Features a3, AbstractSymbol a4) {
         super(lineNumber);
@@ -361,10 +387,10 @@ class method extends Feature {
     /** Creates "method" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for formals
-      * @param a2 initial value for return_type
-      * @param a3 initial value for expr
+      * @param a1 initial value for name
+      * @param a2 initial value for formals
+      * @param a3 initial value for return_type
+      * @param a4 initial value for expr
       */
     public method(int lineNumber, AbstractSymbol a1, Formals a2, AbstractSymbol a3, Expression a4) {
         super(lineNumber);
@@ -409,9 +435,9 @@ class attr extends Feature {
     /** Creates "attr" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for type_decl
-      * @param a2 initial value for init
+      * @param a1 initial value for name
+      * @param a2 initial value for type_decl
+      * @param a3 initial value for init
       */
     public attr(int lineNumber, AbstractSymbol a1, AbstractSymbol a2, Expression a3) {
         super(lineNumber);
@@ -450,8 +476,8 @@ class formalc extends Formal {
     /** Creates "formalc" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for type_decl
+      * @param a1 initial value for name
+      * @param a2 initial value for type_decl
       */
     public formalc(int lineNumber, AbstractSymbol a1, AbstractSymbol a2) {
         super(lineNumber);
@@ -488,9 +514,9 @@ class branch extends Case {
     /** Creates "branch" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for type_decl
-      * @param a2 initial value for expr
+      * @param a1 initial value for name
+      * @param a2 initial value for type_decl
+      * @param a3 initial value for expr
       */
     public branch(int lineNumber, AbstractSymbol a1, AbstractSymbol a2, Expression a3) {
         super(lineNumber);
@@ -529,8 +555,8 @@ class assign extends Expression {
     /** Creates "assign" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
-      * @param a1 initial value for expr
+      * @param a1 initial value for name
+      * @param a2 initial value for expr
       */
     public assign(int lineNumber, AbstractSymbol a1, Expression a2) {
         super(lineNumber);
@@ -569,10 +595,10 @@ class static_dispatch extends Expression {
     /** Creates "static_dispatch" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for expr
-      * @param a1 initial value for type_name
-      * @param a2 initial value for name
-      * @param a3 initial value for actual
+      * @param a1 initial value for expr
+      * @param a2 initial value for type_name
+      * @param a3 initial value for name
+      * @param a4 initial value for actual
       */
     public static_dispatch(int lineNumber, Expression a1, AbstractSymbol a2, AbstractSymbol a3, Expressions a4) {
         super(lineNumber);
@@ -620,9 +646,9 @@ class dispatch extends Expression {
     /** Creates "dispatch" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for expr
-      * @param a1 initial value for name
-      * @param a2 initial value for actual
+      * @param a1 initial value for expr
+      * @param a2 initial value for name
+      * @param a3 initial value for actual
       */
     public dispatch(int lineNumber, Expression a1, AbstractSymbol a2, Expressions a3) {
         super(lineNumber);
@@ -667,9 +693,9 @@ class cond extends Expression {
     /** Creates "cond" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for pred
-      * @param a1 initial value for then_exp
-      * @param a2 initial value for else_exp
+      * @param a1 initial value for pred
+      * @param a2 initial value for then_exp
+      * @param a3 initial value for else_exp
       */
     public cond(int lineNumber, Expression a1, Expression a2, Expression a3) {
         super(lineNumber);
@@ -709,8 +735,8 @@ class loop extends Expression {
     /** Creates "loop" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for pred
-      * @param a1 initial value for body
+      * @param a1 initial value for pred
+      * @param a2 initial value for body
       */
     public loop(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -747,8 +773,8 @@ class typcase extends Expression {
     /** Creates "typcase" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for expr
-      * @param a1 initial value for cases
+      * @param a1 initial value for expr
+      * @param a2 initial value for cases
       */
     public typcase(int lineNumber, Expression a1, Cases a2) {
         super(lineNumber);
@@ -786,7 +812,7 @@ class block extends Expression {
     /** Creates "block" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for body
+      * @param a1 initial value for body
       */
     public block(int lineNumber, Expressions a1) {
         super(lineNumber);
@@ -824,10 +850,10 @@ class let extends Expression {
     /** Creates "let" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for identifier
-      * @param a1 initial value for type_decl
-      * @param a2 initial value for init
-      * @param a3 initial value for body
+      * @param a1 initial value for identifier
+      * @param a2 initial value for type_decl
+      * @param a3 initial value for init
+      * @param a4 initial value for body
       */
     public let(int lineNumber, AbstractSymbol a1, AbstractSymbol a2, Expression a3, Expression a4) {
         super(lineNumber);
@@ -870,8 +896,8 @@ class plus extends Expression {
     /** Creates "plus" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public plus(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -908,8 +934,8 @@ class sub extends Expression {
     /** Creates "sub" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public sub(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -946,8 +972,8 @@ class mul extends Expression {
     /** Creates "mul" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public mul(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -984,8 +1010,8 @@ class divide extends Expression {
     /** Creates "divide" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public divide(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -1021,7 +1047,7 @@ class neg extends Expression {
     /** Creates "neg" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
+      * @param a1 initial value for e1
       */
     public neg(int lineNumber, Expression a1) {
         super(lineNumber);
@@ -1055,8 +1081,8 @@ class lt extends Expression {
     /** Creates "lt" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public lt(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -1093,8 +1119,8 @@ class eq extends Expression {
     /** Creates "eq" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public eq(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -1131,8 +1157,8 @@ class leq extends Expression {
     /** Creates "leq" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
-      * @param a1 initial value for e2
+      * @param a1 initial value for e1
+      * @param a2 initial value for e2
       */
     public leq(int lineNumber, Expression a1, Expression a2) {
         super(lineNumber);
@@ -1168,7 +1194,7 @@ class comp extends Expression {
     /** Creates "comp" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
+      * @param a1 initial value for e1
       */
     public comp(int lineNumber, Expression a1) {
         super(lineNumber);
@@ -1201,7 +1227,7 @@ class int_const extends Expression {
     /** Creates "int_const" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for token
+      * @param a1 initial value for token
       */
     public int_const(int lineNumber, AbstractSymbol a1) {
         super(lineNumber);
@@ -1234,7 +1260,7 @@ class bool_const extends Expression {
     /** Creates "bool_const" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for val
+      * @param a1 initial value for val
       */
     public bool_const(int lineNumber, Boolean a1) {
         super(lineNumber);
@@ -1267,7 +1293,7 @@ class string_const extends Expression {
     /** Creates "string_const" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for token
+      * @param a1 initial value for token
       */
     public string_const(int lineNumber, AbstractSymbol a1) {
         super(lineNumber);
@@ -1302,7 +1328,7 @@ class new_ extends Expression {
     /** Creates "new_" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for type_name
+      * @param a1 initial value for type_name
       */
     public new_(int lineNumber, AbstractSymbol a1) {
         super(lineNumber);
@@ -1335,7 +1361,7 @@ class isvoid extends Expression {
     /** Creates "isvoid" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for e1
+      * @param a1 initial value for e1
       */
     public isvoid(int lineNumber, Expression a1) {
         super(lineNumber);
@@ -1396,7 +1422,7 @@ class object extends Expression {
     /** Creates "object" AST node. 
       *
       * @param lineNumber the line in the source file from which this node came.
-      * @param a0 initial value for name
+      * @param a1 initial value for name
       */
     public object(int lineNumber, AbstractSymbol a1) {
         super(lineNumber);
