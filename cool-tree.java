@@ -65,7 +65,7 @@ abstract class Feature extends TreeNode {
         super(lineNumber);
     }
     public abstract void dump_with_types(PrintStream out, int n);
-
+    protected abstract void semanticAnalysis();
 }
 
 
@@ -422,6 +422,7 @@ class method extends Feature {
 	expr.dump_with_types(out, n + 2);
     }
 
+    public void semanticAnalysis(){}
 }
 
 
@@ -464,6 +465,7 @@ class attr extends Feature {
 	init.dump_with_types(out, n + 2);
     }
 
+    protected void semanticAnalysis(){}
 }
 
 
