@@ -18,7 +18,7 @@ abstract class Program extends TreeNode {
     }
     public abstract void dump_with_types(PrintStream out, int n);
     public abstract void semant();
-
+    public abstract void semanticAnalysis();
 }
 
 
@@ -28,7 +28,7 @@ abstract class Class_ extends TreeNode {
         super(lineNumber);
     }
     public abstract void dump_with_types(PrintStream out, int n);
-
+    public abstract void semanticAnalysis();
 }
 
 
@@ -65,7 +65,7 @@ abstract class Feature extends TreeNode {
         super(lineNumber);
     }
     public abstract void dump_with_types(PrintStream out, int n);
-    protected abstract void semanticAnalysis();
+    public abstract void semanticAnalysis();
 }
 
 
@@ -102,7 +102,7 @@ abstract class Formal extends TreeNode {
         super(lineNumber);
     }
     public abstract void dump_with_types(PrintStream out, int n);
-
+    public abstract void semanticAnalysis();
 }
 
 
@@ -148,7 +148,7 @@ abstract class Expression extends TreeNode {
         else
             { out.println(Utilities.pad(n) + ": _no_type"); }
     }
-
+    public abstract void semanticAnalysis();
 }
 
 
@@ -185,7 +185,7 @@ abstract class Case extends TreeNode {
         super(lineNumber);
     }
     public abstract void dump_with_types(PrintStream out, int n);
-
+    public abstract void semanticAnalysis();
 }
 
 
@@ -238,6 +238,7 @@ class programc extends Program {
     public TreeNode copy() {
         return new programc(lineNumber, (Classes)classes.copy());
     }
+
     public void dump(PrintStream out, int n) {
         out.print(Utilities.pad(n) + "programc\n");
         classes.dump(out, n+2);
@@ -317,6 +318,10 @@ class programc extends Program {
 	}
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -373,6 +378,10 @@ class class_c extends Class_ {
         out.println(Utilities.pad(n + 2) + ")");
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -422,7 +431,10 @@ class method extends Feature {
 	expr.dump_with_types(out, n + 2);
     }
 
-    public void semanticAnalysis(){}
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -465,7 +477,10 @@ class attr extends Feature {
 	init.dump_with_types(out, n + 2);
     }
 
-    protected void semanticAnalysis(){}
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -503,6 +518,10 @@ class formalc extends Formal {
         dump_AbstractSymbol(out, n + 2, type_decl);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -545,6 +564,10 @@ class branch extends Case {
 	expr.dump_with_types(out, n + 2);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -579,10 +602,14 @@ class assign extends Expression {
         dump_line(out, n);
         out.println(Utilities.pad(n) + "_assign");
         dump_AbstractSymbol(out, n + 2, name);
-	expr.dump_with_types(out, n + 2);
-	dump_type(out, n);
+	    expr.dump_with_types(out, n + 2);
+	    dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -635,6 +662,10 @@ class static_dispatch extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -682,6 +713,10 @@ class dispatch extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -725,6 +760,10 @@ class cond extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -763,6 +802,10 @@ class loop extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -803,6 +846,10 @@ class typcase extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -838,6 +885,10 @@ class block extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -886,6 +937,10 @@ class let extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -924,6 +979,10 @@ class plus extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -962,6 +1021,10 @@ class sub extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1000,6 +1063,10 @@ class mul extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1038,6 +1105,10 @@ class divide extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1071,6 +1142,10 @@ class neg extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1109,6 +1184,10 @@ class lt extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1147,6 +1226,10 @@ class eq extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1185,6 +1268,10 @@ class leq extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1218,6 +1305,10 @@ class comp extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1251,6 +1342,10 @@ class int_const extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1284,6 +1379,10 @@ class bool_const extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1319,6 +1418,10 @@ class string_const extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1352,6 +1455,10 @@ class new_ extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1385,6 +1492,10 @@ class isvoid extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1413,6 +1524,10 @@ class no_expr extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+
+    }
 }
 
 
@@ -1446,6 +1561,10 @@ class object extends Expression {
 	dump_type(out, n);
     }
 
+    @Override
+    public void semanticAnalysis() {
+        
+    }
 }
 
 
